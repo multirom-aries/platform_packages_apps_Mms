@@ -315,7 +315,7 @@
         </activity>
 
         <activity android:name=".ui.SearchActivityExtend"
-            android:theme="@style/MmsHoloTheme"
+            android:theme="@style/MmsTheme"
             android:label="@string/search_title"
             android:configChanges="orientation|screenSize|keyboardHidden">
         </activity>

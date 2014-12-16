@@ -374,12 +374,6 @@ public class MessagingPreferenceActivity extends PreferenceActivity
         }
         setSmsValidityPeriodPref();
 
-        // QuickMessage
-        setEnabledQuickMessagePref();
-        setEnabledQmLockscreenPref();
-        setEnabledQmCloseAllPref();
-        setEnabledQmDarkThemePref();
-
         // If needed, migrate vibration setting from the previous tri-state setting stored in
         // NOTIFICATION_VIBRATE_WHEN to the boolean setting stored in NOTIFICATION_VIBRATE.
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -451,6 +445,12 @@ public class MessagingPreferenceActivity extends PreferenceActivity
             storageOptions.removePreference(mSmsValidityCard1Pref);
             storageOptions.removePreference(mSmsValidityCard2Pref);
         }
+
+        // QuickMessage
+        setEnabledQuickMessagePref();
+        setEnabledQmLockscreenPref();
+        setEnabledQmCloseAllPref();
+        setEnabledQmDarkThemePref();
     }
 
     private void setRingtoneSummary(String soundValue) {
