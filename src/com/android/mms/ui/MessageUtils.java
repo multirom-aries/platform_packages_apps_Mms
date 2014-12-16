@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2008 Esmertec AG.
  * Copyright (C) 2008 The Android Open Source Project
  *
@@ -49,7 +52,13 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.StatFs;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.Contacts;
+import android.provider.ContactsContract.Data;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Telephony.Mms;
@@ -84,6 +93,7 @@ import com.android.mms.data.WorkingMessage;
 import com.android.mms.model.MediaModel;
 import com.android.mms.model.SlideModel;
 import com.android.mms.model.SlideshowModel;
+import com.android.mms.transaction.MessagingNotification;
 import com.android.mms.transaction.MmsMessageSender;
 import com.android.mms.util.AddressUtils;
 import com.android.mms.util.DownloadManager;
@@ -119,6 +129,7 @@ public class MessageUtils {
     private static final int SELECT_SYSTEM = 0;
     private static final int SELECT_EXTERNAL = 1;
     private static final boolean DEBUG = false;
+    public static final int PHONE_SINGLE_MODE = -1;
     public static final int PHONE_DEFAULT = 0;  //  for single card product
     public static final int PHONE1 = 0;  // for DSDS product of slot one
     public static final int PHONE2 = 1;  // for DSDS product of slot two
@@ -134,12 +145,23 @@ public class MessageUtils {
     private static String[] sNoSubjectStrings;
     public static String MULTI_SIM_NAME = "perferred_name_sub";
     private static final String VIEW_MODE_NAME = "current_view";
+    // add for different search mode in SearchActivityExtend
+    public static final int SEARCH_MODE_CONTENT = 0;
+    public static final int SEARCH_MODE_NAME    = 1;
+    public static final int SEARCH_MODE_NUMBER  = 2;
+    // add for different match mode in classify search
+    public static final int MATCH_BY_ADDRESS = 0;
+    public static final int MATCH_BY_THREAD_ID = 1;
 
     public static final int PREFER_SMS_STORE_TO_PHONE = 0;
     public static final int PREFER_SMS_STORE_TO_SIM = 1;
 
     // add threshold for low memory
     private static final int THRESHOLD_LOW_MEM_PERCENTAGE = 5;
+    // add for obtain mms data path
+    private static final String MMS_DATA_DATA_DIR = "/data/data";
+    // the remaining space , format as MB
+    public static final long MIN_AVAILABLE_SPACE_MMS = 2 * 1024 * 1024;
 
     // Cache of both groups of space-separated ids to their full
     // comma-separated display names, as well as individual ids to
@@ -155,6 +177,8 @@ public class MessageUtils {
     private static final int[] sVideoDuration =
             new int[] {0, 5, 10, 15, 20, 30, 40, 50, 60, 90, 120};
 
+    public static final int SLIDE_TEXT_LIMIT_SIZE = 3000; // text limit size of slide texts.
+
     /**
      * MMS address parsing data structures
      */
@@ -164,10 +188,23 @@ public class MessageUtils {
     };
 
     private static HashMap numericSugarMap = new HashMap (NUMERIC_CHARS_SUGAR.length);
+    // add for search
+    public static final String SEARCH_KEY_MAIL_BOX_ID    = "mailboxId";
+    public static final String SEARCH_KEY_TITLE          = "title";
+    public static final String SEARCH_KEY_MODE_POSITION  = "mode_position";
+    public static final String SEARCH_KEY_KEY_STRING     = "key_str";
+    public static final String SEARCH_KEY_DISPLAY_STRING = "display_str";
+    public static final String SEARCH_KEY_MATCH_WHOLE    = "match_whole";
+
+    private static final String REPLACE_QUOTES_1 = "'";
+    private static final String REPLACE_QUOTES_2 = "''";
+
     public static final String EXTRA_KEY_NEW_MESSAGE_NEED_RELOAD = "reload";
 
     // Save the thread id for same recipient forward mms
     public static ArrayList<Long> sSameRecipientList = new ArrayList<Long>();
+    // add for obtaining all short message count
+    public static final Uri MESSAGES_COUNT_URI = Uri.parse("content://mms-sms/messagescount");
 
     static {
         for (int i = 0; i < NUMERIC_CHARS_SUGAR.length; i++) {
@@ -362,8 +399,6 @@ public class MessageUtils {
         EncodedStringValue subject = msg.getSubject();
         if (subject != null) {
             String subStr = subject.getString();
-            // Message size should include size of subject.
-            size += subStr.length();
             details.append(subStr);
         }
 
@@ -375,7 +410,8 @@ public class MessageUtils {
         // Message size: *** KB
         details.append('\n');
         details.append(res.getString(R.string.message_size_label));
-        details.append((size - 1)/1000 + 1);
+        details.append((size + SlideshowModel.SLIDESHOW_SLOP - 1)
+                / SlideshowModel.SLIDESHOW_SLOP + 1);
         details.append(" KB");
 
         return details.toString();
@@ -1256,6 +1292,78 @@ public class MessageUtils {
         return context.getString(R.string.slot1);
     }
 
+    public static String getAddressByName(Context context, String name) {
+        String resultAddr = "";
+        if (TextUtils.isEmpty(name)) {
+            return resultAddr;
+        }
+        Cursor c = null;
+        Uri nameUri = null;
+        // Replace the ' to avoid SQL injection.
+        name = name.replace(REPLACE_QUOTES_1, REPLACE_QUOTES_2);
+
+        try {
+            c = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI,
+                    new String[] {ContactsContract.Data.RAW_CONTACT_ID},
+                    ContactsContract.Data.MIMETYPE + " =? AND " + StructuredName.DISPLAY_NAME
+                    + " like '%" + name + "%' ", new String[] {StructuredName.CONTENT_ITEM_TYPE},
+                    null);
+
+            if (c == null) {
+                return resultAddr;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            while (c.moveToNext()) {
+                long raw_contact_id = c.getLong(c.getColumnIndex(ContactsContract.Data.
+                        RAW_CONTACT_ID));
+                if (sb.length() > 0) {
+                    sb.append(",");
+                }
+                sb.append(queryPhoneNumbersWithRaw(context, raw_contact_id));
+            }
+
+            resultAddr = sb.toString();
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+
+        return resultAddr;
+    }
+
+    private static String queryPhoneNumbersWithRaw(Context context, long rawContactId) {
+        Cursor c = null;
+        String addrs = "";
+        try {
+            c = context.getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    new String[] {Phone.NUMBER}, Phone.RAW_CONTACT_ID + " = " + rawContactId,
+                    null, null);
+
+            if (c != null) {
+                int i = 0;
+                while (c.moveToNext()) {
+                    String addrValue = c.getString(c.getColumnIndex(Phone.NUMBER));
+                    if (!TextUtils.isEmpty(addrValue)) {
+                        if (i == 0) {
+                            addrs = addrValue;
+                        } else {
+                            addrs = addrs + "," + addrValue;
+                        }
+                        i++;
+                    }
+                }
+            }
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+        return addrs;
+    }
+
     /**
      * Return the activated card number
      */
@@ -1293,6 +1401,23 @@ public class MessageUtils {
         return (tm.getSimState(phoneId) != TelephonyManager.SIM_STATE_ABSENT)
                     && (tm.getSimState(phoneId) != TelephonyManager.SIM_STATE_CARD_IO_ERROR)
                     && (tm.getSimState(phoneId) != TelephonyManager.SIM_STATE_UNKNOWN);
+    }
+
+    private static boolean isCdmaPhone(long subscription) {
+        boolean isCdma = false;
+        int activePhone =  TelephonyManager.getDefault().getCurrentPhoneType(subscription);
+        if (TelephonyManager.PHONE_TYPE_CDMA == activePhone) {
+            isCdma = true;
+        }
+        return isCdma;
+    }
+
+    private static boolean isNetworkRoaming(long subscription) {
+        return TelephonyManager.getDefault().isNetworkRoaming(subscription);
+    }
+
+    public static boolean isCdmaInternationalRoaming(long subscription) {
+        return isCdmaPhone(subscription) && isNetworkRoaming(subscription);
     }
 
     public static boolean isMsimIccCardActive() {
@@ -1637,5 +1762,67 @@ public class MessageUtils {
         long lowBytes = (path.getTotalSpace() * THRESHOLD_LOW_MEM_PERCENTAGE) / 100;
 
         return lowBytes > path.getFreeSpace();
+    }
+
+    public static long getStoreUnused() {
+        File path = new File(MMS_DATA_DATA_DIR);
+        StatFs stat = new StatFs(path.getPath());
+        long blockSize = stat.getBlockSize();
+        long availableBlocks = stat.getAvailableBlocks();
+        return availableBlocks * blockSize;
+    }
+
+    public static boolean isPhoneMemoryFull() {
+        long available = getStoreUnused();
+        return available < MIN_AVAILABLE_SPACE_MMS ;
+    }
+
+    /* Used for check whether have memory for save mms */
+    public static boolean isMmsMemoryFull() {
+        boolean isMemoryFull = isPhoneMemoryFull();
+        if (isMemoryFull) {
+            Log.d(TAG, "Mms emory is full ");
+            return true;
+        }
+        return false;
+    }
+
+    /* check to see whether short message count is up to 2000 */
+    public static void checkIsPhoneMessageFull(Context context) {
+        boolean isPhoneMemoryFull = isPhoneMemoryFull();
+        boolean isPhoneSmsCountFull = false;
+        int maxSmsMessageCount = context.getResources().getInteger(R.integer.max_sms_message_count);
+        if (maxSmsMessageCount != -1) {
+            int msgCount = getSmsMessageCount(context);
+            isPhoneSmsCountFull = msgCount >= maxSmsMessageCount;
+        }
+
+        Log.d(TAG, "checkIsPhoneMessageFull : isPhoneMemoryFull = " + isPhoneMemoryFull
+                + "isPhoneSmsCountFull = " + isPhoneSmsCountFull);
+
+        MessagingNotification.updateSmsMessageFullIndicator(context,
+                (isPhoneMemoryFull || isPhoneSmsCountFull));
+    }
+
+    public static int getSmsMessageCount(Context context) {
+        int msgCount = -1;
+
+        Cursor cursor = SqliteWrapper.query(context, context.getContentResolver(),
+                MESSAGES_COUNT_URI, null, null, null, null);
+
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    msgCount = cursor.getInt(0);
+                } else {
+                    Log.d(TAG, "getSmsMessageCount returned no rows!");
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        Log.d(TAG, "getSmsMessageCount : msgCount = " + msgCount);
+        return msgCount;
     }
 }

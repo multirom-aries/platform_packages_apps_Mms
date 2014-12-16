@@ -95,8 +95,40 @@
                       android:summary="@string/pref_summary_sms_delivery_reports"
                       android:title="@string/pref_title_sms_delivery_reports" />
     <Preference android:key="pref_key_manage_sim_messages"
-                      android:summary="@string/pref_summary_manage_sim_messages"
                       android:title="@string/pref_title_manage_sim_messages" />
+    <CheckBoxPreference android:defaultValue="false"
+                      android:key="pref_key_sms_delivery_reports_slot1"
+                      android:summary="@string/pref_summary_sms_delivery_reports"
+                      android:title="@string/pref_title_sms_delivery_reports_slot1" />
+    <CheckBoxPreference android:defaultValue="false"
+                      android:key="pref_key_sms_delivery_reports_slot2"
+                      android:summary="@string/pref_summary_sms_delivery_reports"
+                      android:title="@string/pref_title_sms_delivery_reports_slot2" />
+    <ListPreference
+        android:defaultValue="-1"
+        android:dialogTitle="@string/pref_title_sms_validity_period"
+        android:entries="@array/entries_sms_validity_period"
+        android:entryValues="@array/entries_sms_validity_period_value"
+        android:key="pref_key_sms_validity_period"
+        android:title="@string/pref_title_sms_validity_period" />
+    <ListPreference
+        android:defaultValue="-1"
+        android:dialogTitle="@string/pref_title_sms_validity_period"
+        android:entries="@array/entries_sms_validity_period"
+        android:entryValues="@array/entries_sms_validity_period_value"
+        android:key="pref_key_sms_validity_period_slot1"
+        android:title="@string/pref_title_sms_validity_period_slot1" />
+    <ListPreference
+        android:defaultValue="-1"
+        android:dialogTitle="@string/pref_title_sms_validity_period"
+        android:entries="@array/entries_sms_validity_period"
+        android:entryValues="@array/entries_sms_validity_period_value"
+        android:key="pref_key_sms_validity_period_slot2"
+        android:title="@string/pref_title_sms_validity_period_slot2" />
+    <Preference android:key="pref_key_manage_sim_messages_slot1"
+                      android:title="@string/pref_title_manage_sim_messages_slot1" />
+    <Preference android:key="pref_key_manage_sim_messages_slot2"
+                      android:title="@string/pref_title_manage_sim_messages_slot2" />
   </PreferenceCategory>
   <PreferenceCategory android:title="@string/pref_mms_settings_title"
                       android:key="pref_key_mms_settings">
@@ -137,6 +169,9 @@
                         android:title="@string/pref_title_notification_vibrateWhen"
                         android:dependency="pref_key_enable_notifications"
                         android:defaultValue="false" />
+  </PreferenceCategory>
+  <PreferenceCategory android:title="@string/pref_smsc_title"
+                      android:key="pref_key_smsc" >
   </PreferenceCategory>
 
   <!-- QuickMessage settings -->

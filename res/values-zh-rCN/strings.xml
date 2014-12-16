@@ -96,6 +96,7 @@
     <string name="select_different_media" msgid="6241623357299382183">"选择其他<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="exceed_message_size_limitation" msgid="6027753647094742437">"已达到信息大小上限。"</string>
     <string name="message_too_big_for_video" msgid="2639367545165352543">"该短信太大，无法附加视频。"</string>
+    <string name="media_size_limit" msgid="7207464170168708486">"已达到信息大小上限，无法发送。"</string>
     <string name="failed_to_add_media" msgid="7207464170168708485">"您无法将此<xliff:g id="NAME">%1$s</xliff:g>添加到短信中。"</string>
     <string name="failed_to_resize_image" msgid="5608354151631833669">"未调整图片大小。"</string>
     <string name="resize_image_error_information" msgid="3783200130776554475">"重新调整大小后，此照片仍然过大，因此无法发送。"</string>
@@ -111,6 +112,8 @@
     <string name="cannot_send_message_reason" msgid="8745080126044054343">"您的信息没有有效的接收者。"</string>
     <string name="cannot_forward_drm_obj" msgid="5047623751430559077">"无法转发该短信中包含的 DRM 对象。"</string>
     <string name="converting_to_picture_message" msgid="2980023239017588627">"正在转换为彩信…"</string>
+    <!-- Brief message that appears when the maximum size of slides has been reached -->
+    <string name="cannot_add_text_anymore">"无法再添加文字。"</string>
     <string name="cannot_add_slide_anymore" msgid="4631404749618820994">"无法再添加幻灯片。"</string>
     <string name="cannot_add_picture_and_video" msgid="4954353772391381447">"无法将视频和图片添加到同一张幻灯片。"</string>
     <string name="cannot_save_message" msgid="3375907366965264446">"无法保存短信。"</string>
@@ -133,6 +136,8 @@
     <string name="duration_not_a_number" msgid="2856636898040421237">"时长必须为数字。"</string>
     <string name="duration_zero" msgid="3549377790195185977">"时长必须大于 0 秒。"</string>
     <string name="secs" msgid="6886003523109967972">"秒"</string>
+    <!-- Dialog box title for display the current mms size  -->
+    <string name="title_send_message">发送信息</string>
   <string-array name="select_dialog_items">
     <item msgid="4840183714016984112">"1 秒"</item>
     <item msgid="3734955613666864447">"2 秒"</item>
@@ -173,10 +178,14 @@
     <string name="pref_summary_delete_limit" msgid="597128041393045216">"每个会话限存储 <xliff:g id="COUNT">%1$s</xliff:g> 条信息"</string>
     <string name="pref_summary_mms_group_mms" msgid="2266928687440696745">"使用彩信将单条信息发送给多个收件人"</string>
     <string name="pref_title_manage_sim_messages" msgid="7820895261757881177">"管理SIM卡中的信息"</string>
+    <string name="pref_title_manage_sim_messages_slot1" msgid="7820895261757881177">"管理SIM1卡中的信息"</string>
+    <string name="pref_title_manage_sim_messages_slot2" msgid="7820895261757881177">"管理SIM2卡中的信息"</string>
     <string name="pref_title_mms_delivery_reports" msgid="6666857926679451910">"发送报告"</string>
     <string name="pref_title_mms_group_mms" msgid="1251698526583908432">"群发信息"</string>
     <string name="pref_title_mms_read_reports" msgid="4882179829495828541">"已读报告"</string>
     <string name="pref_title_sms_delivery_reports" msgid="876064208254451038">"发送报告"</string>
+    <string name="pref_title_sms_delivery_reports_slot1">"卡1发送报告"</string>
+    <string name="pref_title_sms_delivery_reports_slot2">"卡2发送报告"</string>
     <string name="pref_title_auto_delete" msgid="7227835692631701134">"删除旧短信"</string>
     <string name="pref_title_sms_delete" msgid="6890538316799296878">"短信限制"</string>
     <string name="pref_title_mms_delete" msgid="7265878070847351664">"彩信限制"</string>
@@ -372,6 +381,16 @@
     <string name="slot1">"卡1"</string>
     <string name="slot2">"卡2"</string>
 
+    <string name="pref_title_sms_validity_period">"短信有效期"</string>
+    <string name="pref_title_sms_validity_period_slot1">"卡1短信有效期"</string>
+    <string name="pref_title_sms_validity_period_slot2">"卡2短信有效期"</string>
+    <string name="sms_validity_period_not_set">"不设置"</string>
+    <string name="sms_validity_period_one_hour">"1小时"</string>
+    <string name="sms_validity_period_six_hours">"6小时"</string>
+    <string name="sms_validity_period_twelve_hours">"12小时"</string>
+    <string name="sms_validity_period_one_day">"1天"</string>
+    <string name="sms_validity_period_maximum">"最长"</string>
+
     <string name="confirm_delete_selected_messages">选中的信息将被删除</string>
     <!-- menu item of mailboxmessagecontent -->
     <string name="menu_load_push">载入</string>
@@ -396,6 +415,14 @@
     <string name="type_all">全部</string>
     <string name="type_slot1">卡1</string>
     <string name="type_slot2">卡2</string>
+    <!-- String used in SearchActivityExtend.java -->
+    <string name="search_title">"信息查找"</string>
+    <string name="search_key">"查找关键字"</string>
+    <string name="search_mode">"查找方式"</string>
+    <string name="search_as_name">姓名</string>
+    <string name="search_as_number">号码</string>
+    <string name="search_as_content">内容</string>
+    <string name="invalid_name_toast">请输入有效的姓名！</string>
     <!-- add for showing slot type in MailBoxMessageContent -->
     <string name="slot_type">卡槽 : %s</string>
     <string name="download_dialog_title">确认下载信息？</string>
@@ -411,5 +438,18 @@
     <string name="pref_title_sms_store_sim2">卡2优先存储器</string>
     <string name="pref_sms_store_phone">话机</string>
     <string name="pref_sms_store_sim">SIM卡</string>
+    <string name="pref_sim_card_full_save_to_phone">SIM卡短信存储已满，自动保存到手机内存。</string>
     <string name="pref_sms_store_sim_unknown_fail">新短信接收失败，无法正确读取SIM卡</string>
+    <string name="forward_size_over">禁止转发，新彩信内容超过300k。</string>
+
+    <string name="sim_capacity_title">"Sim卡容量"</string>
+    <string name="sim_capacity_used">"已使用:"</string>
+    <string name="sim_capacity">"总容量:"</string>
+    <!-- SMSC -->
+    <string name="pref_smsc_title">短消息中心设置</string>
+    <string name="pref_one_smcs">"设置短消息中心号码"</string>
+    <string name="pref_more_smcs">"设置SIM卡"<xliff:g id="slot_number">%d</xliff:g>"的短消息中心号码"</string>
+    <string name="set_smsc_error">设置短消息中心号码失败</string>
+    <string name="set_smsc_success">设置短消息中心号码成功</string>
+    <string name="set_smsc_confirm_message">修改短消息中心号码可能导致短信发送失败，确认修改吗？</string>
 </resources>
