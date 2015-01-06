@@ -38,6 +38,7 @@
          one or more phone numbers and/or email addresses and the number or email is new to
          contacts. [CHAR LIMIT=50] -->
     <string name="menu_add_address_to_contacts">Add <xliff:g id="contactEmailOrNumber">%s</xliff:g> to People</string>
+    <string name="menu_copy_url">Copy url <xliff:g id="extractedurl">%s</xliff:g></string>
     <!-- Menu item to call the recipient of the conversation on the phone (imperative verb) -->
     <string name="menu_call">Call</string>
     <!-- Menu item for search -->
@@ -813,6 +814,12 @@
     <!-- In message list items, this string builds the timestamp line when the message is in a group [CHAR LIMIT=NONE] -->
     <string name="message_timestamp_format"><xliff:g id="string" example="Fred Flinstone">%1$s</xliff:g>\u0020-\u0020<xliff:g id="string" example="9:39AM">%2$s</xliff:g></string>
 
+    <string name="mail_to">mailto:</string>
+    <!-- Menu item to connect the extract url in WwwContextMenuActivity  -->
+    <string name="menu_connect_url">Connect</string>
+    <!-- Menu item to add the extract url to boomark in WwwContextMenuActivity  -->
+    <string name="menu_add_to_label">Save to bookmark</string>
+    <string name="loadurlinfo_str">Load the URL?</string>
     <!-- SMSC -->
     <string name="pref_smsc_title">SMSC Settings</string>
     <string name="pref_one_smcs">"Set the SMSC number"</string>
@@ -858,6 +865,9 @@
     <string name="slot1">Slot1</string>
     <string name="slot2">Slot2</string>
 
+    <string name="open_wap_push_title">Browser Information</string>
+    <string name="open_wap_push_body">Do you want to open the web site?</string>
+
     <string name="confirm_delete_selected_messages">The selected messages will be deleted.</string>
     <!-- menu item of mailboxmessagecontent -->
     <string name="menu_load_push">Load</string>
@@ -893,6 +903,7 @@
     <!-- add for showing slot type in MailBoxMessageContent -->
     <string name="slot_type">Slot : %s</string>
     <string name="download_dialog_title">Comfirm download this MMS?</string>
+    <string name="menu_email">Send Email</string>
 
     <!-- Settings item description for Preferred storage -->
     <string name="pref_title_sms_store">Preferred storage</string>
