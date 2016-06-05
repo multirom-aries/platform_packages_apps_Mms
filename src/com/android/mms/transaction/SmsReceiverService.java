@@ -255,8 +255,8 @@ public class SmsReceiverService extends Service {
     private void handleServiceStateChanged(Intent intent) {
         // If service just returned, start sending out the queued messages
         ServiceState serviceState = ServiceState.newFromBundle(intent.getExtras());
-        long subId = intent.getLongExtra(PhoneConstants.SUBSCRIPTION_KEY, 0);
-        long prefSubId = SubscriptionManager.getDefaultSmsSubId();
+        int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, 0);
+        int prefSubId = SubscriptionManager.getDefaultSmsSubId();
         // if service state is IN_SERVICE & current subscription is same as
         // preferred SMS subscription.i.e.as set under SIM Settings, then
         // sendFirstQueuedMessage.
@@ -803,8 +803,8 @@ public class SmsReceiverService extends Service {
      *
      */
     private void displayClassZeroMessage(Context context, SmsMessage sms, String format) {
-        long subId = sms.getSubId();
-        int phoneId = SubscriptionManager.getPhoneId((int)subId);
+        int subId = sms.getSubId();
+        int phoneId = SubscriptionManager.getPhoneId(subId);
 
         // Using NEW_TASK here is necessary because we're calling
         // startActivity from outside an activity.
@@ -845,7 +845,7 @@ public class SmsReceiverService extends Service {
 
     private boolean saveMessageToIcc(SmsMessage sms) {
         boolean result = true;
-        int subId = (int) sms.getSubId();
+        int subId = sms.getSubId();
         int phoneId = SubscriptionManager.getPhoneId(subId);
         byte pdu[] = MessageUtils.getDeliveryPdu(null, sms.getOriginatingAddress(),
                 sms.getMessageBody(), sms.getTimestampMillis(), phoneId);
